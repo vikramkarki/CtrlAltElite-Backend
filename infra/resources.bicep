@@ -105,10 +105,9 @@ resource web 'Microsoft.Web/sites@2022-03-01' = {
   resource appSettings 'config' = {
     name: 'appsettings'
     properties: {
+      AZURE_POSTGRESQL_CONNECTIONSTRING: 'dbname=${djangoDatabase.name} host=${postgresServer.name}.postgres.database.azure.com port=5432 sslmode=require user=${postgresServer.properties.administratorLogin} password=${databasePassword}'
       SCM_DO_BUILD_DURING_DEPLOYMENT: 'true'
-      AZURE_POSTGRESQL_CONNECTIONSTRING: 'dbname=${pythonAppDatabase.name} host=${postgresServer.name}.postgres.database.azure.com port=5432 sslmode=require user=${postgresServer.properties.administratorLogin} password=${databasePassword}'
       SECRET_KEY: secretKey
-      FLASK_DEBUG: 'False'
     }
   }
 
@@ -143,48 +142,8 @@ resource web 'Microsoft.Web/sites@2022-03-01' = {
     }
   }
 
-  dependsOn: [ virtualNetwork ]
+  dependsOn: [virtualNetwork]
 
-}
-
-resource webdiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'AllLogs'
-  scope: web
-  properties: {
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'AppServiceHTTPLogs'
-        enabled: true
-      }
-      {
-        category: 'AppServiceConsoleLogs'
-        enabled: true
-      }
-      {
-        category: 'AppServiceAppLogs'
-        enabled: true
-      }
-      {
-        category: 'AppServiceAuditLogs'
-        enabled: true
-      }
-      {
-        category: 'AppServiceIPSecAuditLogs'
-        enabled: true
-      }
-      {
-        category: 'AppServicePlatformLogs'
-        enabled: true
-      }
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-      }
-    ]
-  }
 }
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
@@ -224,6 +183,7 @@ module applicationInsightsResources 'appinsights.bicep' = {
   }
 }
 
+
 resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-01-20-preview' = {
   location: location
   tags: tags
@@ -234,7 +194,7 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-01-20-pr
   }
   properties: {
     version: '12'
-    administratorLogin: 'postgresadmin'
+    administratorLogin: 'django'
     administratorLoginPassword: databasePassword
     storage: {
       storageSizeGB: 128
@@ -263,21 +223,11 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-01-20-pr
   ]
 }
 
-resource pythonAppDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2022-01-20-preview' = {
+
+resource djangoDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2022-01-20-preview' = {
   parent: postgresServer
-  name: 'pythonapp'
+  name: 'django'
 }
 
 output WEB_URI string = 'https://${web.properties.defaultHostName}'
 output APPLICATIONINSIGHTS_CONNECTION_STRING string = applicationInsightsResources.outputs.APPLICATIONINSIGHTS_CONNECTION_STRING
-
-resource webAppSettings 'Microsoft.Web/sites/config@2022-03-01' existing = {
-  name: web::appSettings.name
-  parent: web
-}
-
-var webAppSettingsKeys = map(items(webAppSettings.list().properties), setting => setting.key)
-output WEB_APP_SETTINGS array = webAppSettingsKeys
-output WEB_APP_LOG_STREAM string = format('https://portal.azure.com/#@/resource{0}/logStream', web.id)
-output WEB_APP_SSH string = format('https://{0}.scm.azurewebsites.net/webssh/host', web.name)
-output WEB_APP_CONFIG string = format('https://portal.azure.com/#@/resource{0}/configuration', web.id)
