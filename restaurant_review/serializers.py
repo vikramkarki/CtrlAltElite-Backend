@@ -5,3 +5,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = '__all__'
+
+class Therapist(serializers.ModelSerializer):
+
+    class Meta:
+        model = Therapist
+        fields = '__all__'

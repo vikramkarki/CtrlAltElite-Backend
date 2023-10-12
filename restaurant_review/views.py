@@ -80,11 +80,49 @@ class AppointmentListView(APIView):
         if item_id:
             item = get_object_or_404(Appointment, id=item_id)
             serializer = AppointmentSerializer(item)
-            return Response(serializer.data)
+            Appointments=Appointment.objects.filter(id=item_id).select_related("client").select_related("therapist")
+            Appoint={}
+            for appo in Appointments:
+                Appoint={
+                    "id":appo.id,
+                    "therapistid":appo.therapist.id,
+                    "therapistName":appo.therapist.name,
+                    "clientId":appo.client.id,
+                    "clientName":appo.client.name,
+                    "clientAddress":appo.client.address,
+                    "checkinTime":appo.sc_checkin_time,
+                    "checkoutTime":appo.sc_checkout_time,
+                    "actualCheckinTime":appo.act_checkin_time,
+                    "actualCheckoutTime":appo.act_checkout_time,
+                    "status":appo.status,
+                    "therapistContact":appo.therapist.contact
+
+                }
+            
+            return Response(Appoint)
         else:
             items = Appointment.objects.all()
             serializer = AppointmentSerializer(items, many=True)
-            return Response(serializer.data)
+            Appointments=Appointment.objects.select_related("client").select_related("therapist")
+            App_list= []
+            for appo in Appointments:
+                Appoint={
+                    "id":appo.id,
+                    "therapistid":appo.therapist.id,
+                    "therapistName":appo.therapist.name,
+                    "clientId":appo.client.id,
+                    "clientName":appo.client.name,
+                    "clientAddress":appo.client.address,
+                    "checkinTime":appo.sc_checkin_time,
+                    "checkoutTime":appo.sc_checkout_time,
+                    "actualCheckinTime":appo.act_checkin_time,
+                    "actualCheckoutTime":appo.act_checkout_time,
+                    "status":appo.status,
+                    "therapistContact":appo.therapist.contact
+
+                }
+                App_list.append(Appoint)
+            return Response(App_list)
 
     def post(self, request):
         serializer = AppointmentSerializer(data=request.data)
@@ -92,3 +130,5 @@ class AppointmentListView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
