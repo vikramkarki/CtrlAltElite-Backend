@@ -77,18 +77,18 @@ def add_review(request, id):
 
 class AppointmentListView(APIView):
     def get(self, request, item_id=None):
-    if item_id:
-    item = get_object_or_404(Appointment, id=item_id)
-    serializer = AppointmentSerializer(item)
-    return Response(serializer.data)
-    else:
-    items = Appointment.objects.all()
-    serializer = AppointmentSerializer(items, many=True)
-    return Response(serializer.data)
+        if item_id:
+            item = get_object_or_404(Appointment, id=item_id)
+            serializer = AppointmentSerializer(item)
+            return Response(serializer.data)
+        else:
+            items = Appointment.objects.all()
+            serializer = AppointmentSerializer(items, many=True)
+            return Response(serializer.data)
 
     def post(self, request):
-    serializer = AppointmentSerializer(data=request.data)
-    if serializer.is_valid():
-    serializer.save()
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = AppointmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
