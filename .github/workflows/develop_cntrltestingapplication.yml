@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'cntrlTestingApplication'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C8036C36C0C44030AC999323C2B2C1CA }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_5BBE29A935EA47E9B8376520AE4AD770 }}
