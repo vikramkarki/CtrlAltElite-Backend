@@ -40,8 +40,8 @@ class Appointment(models.Model):
     sc_checkout_time = models.DateTimeField()
     status = models.CharField(max_length=20)
     sos_flag = models.BooleanField()
-    act_checkin_time = models.DateTimeField(blank=True)
-    act_checkout_time = models.DateTimeField(blank=True)
+    act_checkin_time = models.DateTimeField(blank=True, null=True)
+    act_checkout_time = models.DateTimeField(blank=True, null=True)
  
 class Admin(models.Model):
     name = models.CharField(max_length=100)
