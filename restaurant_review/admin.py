@@ -6,9 +6,7 @@ from .models import Restaurant, Review, Client, Therapist, Appointment, Admin
 
 admin.site.register(Restaurant)
 admin.site.register(Review)
-
 admin.site.register(Client)
-admin.site.register(Review)
 admin.site.register(Therapist)
 admin.site.register(Appointment)
 admin.site.register(Restaurant)
