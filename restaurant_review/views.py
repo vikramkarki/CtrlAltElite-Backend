@@ -4,6 +4,11 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from restaurant_review.models import Client,Therapist,Appointment
+from restaurant_review.serializers import AppointmentSerializer
 
 from restaurant_review.models import Restaurant, Review
 
@@ -69,3 +74,21 @@ def add_review(request, id):
         Review.save(review)
 
     return HttpResponseRedirect(reverse('details', args=(id,)))
+
+class AppointmentListView(APIView):
+    def get(self, request, item_id=None):
+    if item_id:
+    item = get_object_or_404(Appointment, id=item_id)
+    serializer = AppointmentSerializer(item)
+    return Response(serializer.data)
+    else:
+    items = Appointment.objects.all()
+    serializer = AppointmentSerializer(items, many=True)
+    return Response(serializer.data)
+
+    def post(self, request):
+    serializer = AppointmentSerializer(data=request.data)
+    if serializer.is_valid():
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
